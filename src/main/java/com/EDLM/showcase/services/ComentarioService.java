@@ -17,11 +17,13 @@ import com.EDLM.showcase.repositories.UsuarioRepository;
 /**
  * Servicio que gestiona la lógica de negocio relacionada con los comentarios.
  * Permite crear comentarios principales, listarlos por track y contarlos.
- * 
+ *
  * @author Elvis David Lara Manrique <a href=
  *         "mailto:david.larman.1@educa.jcyl.es">david.larman.1@educa.jcyl.es</a>
  * @version 1.0
  * @since 1.0
+ * @see Comentario
+ * @see ComentarioRepository
  */
 @Service
 public class ComentarioService {
@@ -62,53 +64,52 @@ public class ComentarioService {
 	}
 
 	/**
-	 * Devuelve la lista de comentarios principales de un track con sus respuestas anidadas.
-	 * Cada comentario se convierte a ComentarioData para no exponer la entidad directamente.
-	 * Solo devuelve comentarios de primer nivel (comentarioPadre == null) — las respuestas
-	 * se cargan para cada comentario y se incluyen en el campo respuestas del DTO.
-	 * El password del usuario se omite intencionadamente — no tiene sentido exponer el hash.
+	 * Devuelve la lista de comentarios principales de un track con sus respuestas
+	 * anidadas. Cada comentario se convierte a ComentarioData para no exponer la
+	 * entidad directamente. Solo devuelve comentarios de primer nivel
+	 * (comentarioPadre == null) — las respuestas se cargan para cada comentario y
+	 * se incluyen en el campo respuestas del DTO. El password del usuario se omite
+	 * intencionadamente — no tiene sentido exponer el hash.
 	 *
 	 * @param idTrack ID del track del que se quieren obtener los comentarios
-	 * @return Lista de ComentarioData con los comentarios principales y sus respuestas
+	 * @return Lista de ComentarioData con los comentarios principales y sus
+	 *         respuestas
 	 */
 	public List<ComentarioData> getComentariosTrack(Integer idTrack) {
-	    List<Comentario> comentarios = comentarioRepository.findByTrackIdTrackAndComentarioPadreIsNull(idTrack);
-	    List<ComentarioData> resultado = new ArrayList<>();
+		List<Comentario> comentarios = comentarioRepository.findByTrackIdTrackAndComentarioPadreIsNull(idTrack);
+		List<ComentarioData> resultado = new ArrayList<>();
 
-	    for (Comentario comentario : comentarios) {
-	        DataUsuario dataUsuario = new DataUsuario(comentario.getUsuario().getNombre(),
-	                comentario.getUsuario().getApellido(), comentario.getUsuario().getEmail(), null,
-	                comentario.getUsuario().getRol());
+		for (Comentario comentario : comentarios) {
+			DataUsuario dataUsuario = new DataUsuario(comentario.getUsuario().getNombre(),
+					comentario.getUsuario().getApellido(), comentario.getUsuario().getEmail(), null,
+					comentario.getUsuario().getRol());
 
-	        ComentarioData comentarioData = new ComentarioData();
-	        comentarioData.setIdComentario(comentario.getIdComent());
-	        comentarioData.setUsuario(dataUsuario);
-	        comentarioData.setContenido(comentario.getContenido());
-	        comentarioData.setFecha(java.sql.Timestamp.valueOf(comentario.getFecComent()));
+			ComentarioData comentarioData = new ComentarioData();
+			comentarioData.setIdComentario(comentario.getIdComent());
+			comentarioData.setUsuario(dataUsuario);
+			comentarioData.setContenido(comentario.getContenido());
+			comentarioData.setFecha(java.sql.Timestamp.valueOf(comentario.getFecComent()));
 
-	        // Cargamos las respuestas de este comentario
-	        List<Comentario> respuestas = comentarioRepository
-	                .findByComentarioPadreIdComentOrderByFecComentAsc(comentario.getIdComent());
-	        List<ComentarioData> respuestasData = new ArrayList<>();
-	        for (Comentario respuesta : respuestas) {
-	            DataUsuario dataUsuarioRespuesta = new DataUsuario(
-	                    respuesta.getUsuario().getNombre(),
-	                    respuesta.getUsuario().getApellido(),
-	                    respuesta.getUsuario().getEmail(),
-	                    null,
-	                    respuesta.getUsuario().getRol());
-	            ComentarioData respuestaData = new ComentarioData();
-	            respuestaData.setIdComentario(respuesta.getIdComent());
-	            respuestaData.setUsuario(dataUsuarioRespuesta);
-	            respuestaData.setContenido(respuesta.getContenido());
-	            respuestaData.setFecha(java.sql.Timestamp.valueOf(respuesta.getFecComent()));
-	            respuestasData.add(respuestaData);
-	        }
-	        comentarioData.setRespuestas(respuestasData);
-	        resultado.add(comentarioData);
-	    }
+			// Cargamos las respuestas de este comentario
+			List<Comentario> respuestas = comentarioRepository
+					.findByComentarioPadreIdComentOrderByFecComentAsc(comentario.getIdComent());
+			List<ComentarioData> respuestasData = new ArrayList<>();
+			for (Comentario respuesta : respuestas) {
+				DataUsuario dataUsuarioRespuesta = new DataUsuario(respuesta.getUsuario().getNombre(),
+						respuesta.getUsuario().getApellido(), respuesta.getUsuario().getEmail(), null,
+						respuesta.getUsuario().getRol());
+				ComentarioData respuestaData = new ComentarioData();
+				respuestaData.setIdComentario(respuesta.getIdComent());
+				respuestaData.setUsuario(dataUsuarioRespuesta);
+				respuestaData.setContenido(respuesta.getContenido());
+				respuestaData.setFecha(java.sql.Timestamp.valueOf(respuesta.getFecComent()));
+				respuestasData.add(respuestaData);
+			}
+			comentarioData.setRespuestas(respuestasData);
+			resultado.add(comentarioData);
+		}
 
-	    return resultado;
+		return resultado;
 	}
 
 	/**
@@ -143,42 +144,44 @@ public class ComentarioService {
 	public Integer contarComentariosByUsuario(Integer idUsuario) {
 		return comentarioRepository.countByUsuarioIdUsuario(idUsuario);
 	}
-	
+
 	/**
-	 * Devuelve los comentarios escritos por un usuario ordenados del más reciente al más antiguo.
-	 * Se usa para mostrar la sección "Mis comentarios" en el perfil del usuario.
-	 * Convierte cada Comentario a ComentarioData para no exponer la entidad directamente.
-	 * Incluye el título del track para poder mostrarlo junto al comentario en el perfil.
-	 * El password del usuario se omite intencionadamente — no tiene sentido exponer el hash.
+	 * Devuelve los comentarios escritos por un usuario ordenados del más reciente
+	 * al más antiguo. Se usa para mostrar la sección "Mis comentarios" en el perfil
+	 * del usuario. Convierte cada Comentario a ComentarioData para no exponer la
+	 * entidad directamente. Incluye el título del track para poder mostrarlo junto
+	 * al comentario en el perfil. El password del usuario se omite
+	 * intencionadamente — no tiene sentido exponer el hash.
 	 *
 	 * @param idUsuario ID del usuario
 	 * @return Lista de ComentarioData con los comentarios escritos por el usuario
 	 */
 	public List<ComentarioData> getComentariosByUsuario(Integer idUsuario) {
-	    List<Comentario> comentarios = comentarioRepository.findByUsuarioIdUsuarioOrderByFecComentDesc(idUsuario);
-	    List<ComentarioData> resultado = new ArrayList<>();
-	    for (Comentario comentario : comentarios) {
-	        DataUsuario dataUsuario = new DataUsuario(
-	                comentario.getUsuario().getNombre(),
-	                comentario.getUsuario().getApellido(),
-	                comentario.getUsuario().getEmail(),
-	                null, // password = null, no tiene sentido exponer el hash
-	                comentario.getUsuario().getRol());
-	        ComentarioData comentarioData = new ComentarioData();
-	        comentarioData.setIdComentario(comentario.getIdComent());
-	        comentarioData.setUsuario(dataUsuario);
-	        comentarioData.setContenido(comentario.getContenido());
-	        comentarioData.setFecha(java.sql.Timestamp.valueOf(comentario.getFecComent()));
-	        // Añadimos el título del track para mostrarlo en el perfil del usuario
-	        comentarioData.setTituloTrack(comentario.getTrack().getTitulo());
-	        resultado.add(comentarioData);
-	    }
-	    return resultado;
+		List<Comentario> comentarios = comentarioRepository.findByUsuarioIdUsuarioOrderByFecComentDesc(idUsuario);
+		List<ComentarioData> resultado = new ArrayList<>();
+		for (Comentario comentario : comentarios) {
+			DataUsuario dataUsuario = new DataUsuario(comentario.getUsuario().getNombre(),
+					comentario.getUsuario().getApellido(), comentario.getUsuario().getEmail(), null, // password = null,
+																										// no tiene
+																										// sentido
+																										// exponer el
+																										// hash
+					comentario.getUsuario().getRol());
+			ComentarioData comentarioData = new ComentarioData();
+			comentarioData.setIdComentario(comentario.getIdComent());
+			comentarioData.setUsuario(dataUsuario);
+			comentarioData.setContenido(comentario.getContenido());
+			comentarioData.setFecha(java.sql.Timestamp.valueOf(comentario.getFecComent()));
+			// Añadimos el título del track para mostrarlo en el perfil del usuario
+			comentarioData.setTituloTrack(comentario.getTrack().getTitulo());
+			resultado.add(comentarioData);
+		}
+		return resultado;
 	}
-	
+
 	/**
-	 * Crea una respuesta a un comentario existente.
-	 * Busca el comentario padre y lo asigna al nuevo comentario.
+	 * Crea una respuesta a un comentario existente. Busca el comentario padre y lo
+	 * asigna al nuevo comentario.
 	 *
 	 * @param idComentPadre ID del comentario al que se responde
 	 * @param idUsuario     ID del usuario que responde
@@ -186,13 +189,14 @@ public class ComentarioService {
 	 * @return true si la respuesta se ha guardado correctamente
 	 */
 	public boolean responderComentario(int idComentPadre, int idUsuario, String contenido) {
-	    Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
-	    Comentario padre = comentarioRepository.findById(idComentPadre).orElse(null);
-	    if (padre == null) return false;
-	    Comentario respuesta = new Comentario(usuario, padre.getTrack(), contenido);
-	    respuesta.setComentarioPadre(padre);
-	    comentarioRepository.save(respuesta);
-	    return true;
+		Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+		Comentario padre = comentarioRepository.findById(idComentPadre).orElse(null);
+		if (padre == null)
+			return false;
+		Comentario respuesta = new Comentario(usuario, padre.getTrack(), contenido);
+		respuesta.setComentarioPadre(padre);
+		comentarioRepository.save(respuesta);
+		return true;
 	}
 
 }

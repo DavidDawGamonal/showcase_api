@@ -15,17 +15,21 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 /**
- * Representa la entidad de usuario en el sistema de showcase para productores musicales.
- * Esta clase mapea la tabla 'usuarios' en la base de datos y contiene toda la información
- * relevante de un usuario, incluyendo sus datos personales y su rol en el sistema.
+ * Representa la entidad de usuario en el sistema de showcase para productores
+ * musicales. Esta clase mapea la tabla 'usuarios' en la base de datos y
+ * contiene toda la información relevante de un usuario, incluyendo sus datos
+ * personales y su rol en el sistema.
  * 
- * <p>Los usuarios pueden ser de dos tipos según su {@link Rol}:</p>
+ * <p>
+ * Los usuarios pueden ser de dos tipos según su {@link Rol}:
+ * </p>
  * <ul>
- *   <li><b>USUARIO</b>: Consumidor de contenido musical</li>
- *   <li><b>PRODUCTOR</b>: Creador de contenido musical</li>
+ * <li><b>USUARIO</b>: Consumidor de contenido musical</li>
+ * <li><b>PRODUCTOR</b>: Creador de contenido musical</li>
  * </ul>
  * 
- * @author Elvis David Lara Manrique  <a href="mailto:david.larman.1@educa.jcyl.es">david.larman.1@educa.jcyl.es</a>
+ * @author Elvis David Lara Manrique <a href=
+ *         "mailto:david.larman.1@educa.jcyl.es">david.larman.1@educa.jcyl.es</a>
  * @version 1.0
  * @since 1.0
  * @see com.EDLM.showcase.enums.Rol
